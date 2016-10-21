@@ -1,0 +1,30 @@
+{
+  "name": "rollup-plugin-handlebars-plus",
+  "version": "0.1.0",
+  "description": "Rollup plugin to compile Handlebars templates including support for partials and more.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mixmaxhq/rollup-plugin-handlebars-plus.git"
+  },
+  "keywords": [
+    "rollup",
+    "plugin",
+    "Handlebars",
+    "templates",
+    "partials",
+    "jQuery"
+  ],
+  "author": "Jeff Wear <jeff@mixmax.com> (https://mixmax.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/issues"
+  },
+  "homepage": "https://github.com/mixmaxhq/rollup-plugin-handlebars-plus#readme",
+  "dependencies": {
+    "handlebars": "^4.0.5"
+  }
+}
