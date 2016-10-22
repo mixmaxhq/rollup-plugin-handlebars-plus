@@ -151,6 +151,7 @@ need to install `rollup-plugin-node-resolve` and `rollup-plugin-commonjs`:
 var rollup = require('rollup');
 var nodeResolve = require('rollup-plugin-node-resolve');
 var commonjs = require('rollup-plugin-commonjs');
+var handlebars = require('rollup-plugin-handlebars-plus');
 
 rollup({
   entry: 'main.js',
