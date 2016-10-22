@@ -138,7 +138,7 @@ console.log(DashboardLinkTemplate({ email: 'jeff@mixmax.com' }));
 This plugin produces [precompiled](http://handlebarsjs.com/precompilation.html) templates, which
 then need to be rendered by the Handlebars runtime. You can either bundle the runtime yourself
 and provide its module ID to this plugin using the `handlebars.id` option, or you can let the
-plugin load its own copy of the runtime.
+plugin bundle its own copy of the runtime.
 
 The advantage of the latter is that compatibility is
 guaranteed between the compiler and the runtime (see #6
