@@ -6,8 +6,7 @@ Features:
 
 * Import Handlebars templates as ES6 modules
 * Support for Handlebars [helpers](#helpers) and partials
-* [Precompiles](http://handlebarsjs.com/precompilation.html) templates so your application only needs
-* the Handlebars runtime
+* [Precompiles](http://handlebarsjs.com/precompilation.html) templates so your application only needs the Handlebars runtime
 * Handlebars runtime [included](#handlebars)
 * Optional rendering to [jQuery collections](#jquery) vs. raw strings
 
