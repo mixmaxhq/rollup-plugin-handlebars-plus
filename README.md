@@ -204,6 +204,7 @@ this plugin, using the `jquery` option:
 
 ```js
 var rollup = require('rollup');
+var handlebars = require('rollup-plugin-handlebars-plus');
 
 rollup({
   entry: 'main.js',
