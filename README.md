@@ -216,6 +216,9 @@ rollup({
 })
 ```
 
+Curious about how to ID jQuery when it's a global i.e. you're _not_ bundling it?
+[Here's a Gist for that.](https://gist.github.com/wearhere/a3684edd54787b698029e42ea6ccc0f3)
+
 In case you want to render to a string even when using this option, all precompiled template functions
 have the signature `(data, options, asString)` so you can do:
 
