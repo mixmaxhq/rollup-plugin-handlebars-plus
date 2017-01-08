@@ -1,8 +1,13 @@
 var Handlebars = require('handlebars');
 var ImportScanner = require('./ImportScanner');
+var path = require('path');
 
 // The default module ID of the Handlebars runtime--the path of its CJS definition within this module.
-var DEFAULT_HANDLEBARS_ID = 'rollup-plugin-handlebars-plus/node_modules/handlebars/runtime';
+// Note that it needs to be relative to our consumer's `node_modules` directory not absolute, or
+// else we'll bypass the `rollup-plugin-commonjs` configuration of `include: 'node_modules/**'`
+// and `rollup-plugin-babel` configuration of `exclude: 'node_modules/**'`.
+var consumerNodeModules = path.join(__dirname, '../..');
+var DEFAULT_HANDLEBARS_ID = path.relative(consumerNodeModules, require.resolve('handlebars/runtime'));
 
 /**
  * Constructs a Rollup plugin to compile Handlebars templates.
@@ -115,5 +120,8 @@ function handlebars(options) {
     }
   };
 }
+
+// In case the consumer needs it.
+handlebars.runtimeId = DEFAULT_HANDLEBARS_ID;
 
 module.exports = handlebars;
