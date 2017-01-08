@@ -43,7 +43,7 @@ rollup({
         // The module ID of the Handlebars runtime, exporting `Handlebars` as `default`.
         // As a shortcut, you can pass this as the value of `handlebars` above.
         // See the "Handlebars" section below.
-        id: 'handlebars', // Default: the path of Handlebars' UMD definition within this module
+        id: 'handlebars', // Default: the path of Handlebars' CJS definition within this module
 
         // Options to pass to Handlebars' `parse` and `precompile` methods.
         options: {
@@ -145,7 +145,7 @@ The advantage of the latter is that compatibility is
 guaranteed between the compiler and the runtime (see #6
 [here](https://github.com/wycats/handlebars.js/blob/8517352e209569f5a373d7a61ef4a673582d9616/FAQ.md)).
 
-The tradeoff is that the plugin's copy of the runtime is a UMD module, so to load such you'll also
+The tradeoff is that the plugin's copy of the runtime is a CJS module, so to load such you'll also
 need to install `rollup-plugin-node-resolve` and `rollup-plugin-commonjs`:
 
 ```js

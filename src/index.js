@@ -1,8 +1,8 @@
 var Handlebars = require('handlebars');
 var ImportScanner = require('./ImportScanner');
 
-// The default module ID of the Handlebars runtime--the path of its UMD definition within this module.
-var DEFAULT_HANDLEBARS_ID = 'rollup-plugin-handlebars-plus/node_modules/handlebars/dist/handlebars.runtime.js';
+// The default module ID of the Handlebars runtime--the path of its CJS definition within this module.
+var DEFAULT_HANDLEBARS_ID = 'rollup-plugin-handlebars-plus/node_modules/handlebars/runtime';
 
 /**
  * Constructs a Rollup plugin to compile Handlebars templates.
