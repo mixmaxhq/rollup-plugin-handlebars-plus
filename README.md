@@ -165,6 +165,11 @@ rollup({
 })
 ```
 
+In case you need the default runtime ID, it's available as `handlebars.runtimeId`. This might be
+useful if you want to import the runtime for use by templates precompiled by something other than
+this plugin. In that case, you'll have to make sure that the other compiler's version is compatible
+with this runtime.
+
 ### jQuery
 
 At Mixmax we often find it convenient to render templates to [jQuery](https://jquery.com/) collections
