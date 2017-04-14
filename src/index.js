@@ -86,7 +86,11 @@ function handlebars(options) {
 
       for (var partial of scanner.partials) {
         // Register the partial dependencies as partials.
-        body += `import '${partial}${options.templateExtension}';\n`;
+        // do not import special partial @partial-block: http://handlebarsjs.com/partials.html#partial-block
+        if (!partial.startsWith('@')) {
+          // rollup-plugin-root-import require import from '/'
+          body += `import '/${partial}${options.templateExtension}';\n`;
+        }
       }
 
       body += `var Template = Handlebars.template(${template});\n`;
