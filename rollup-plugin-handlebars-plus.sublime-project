@@ -6,7 +6,10 @@
       "dist"
     ],
     "file_exclude_patterns": [
-      "spec/gate/spec.bundle.js"
+      "spec/gate/spec.bundle.js",
+
+      // Yarn lock file
+      "yarn.lock"
     ]
   }],
   "settings": {
