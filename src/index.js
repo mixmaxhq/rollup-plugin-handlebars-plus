@@ -109,7 +109,7 @@ function handlebars(options) {
       }
 
       body += `export default function(data, options, asString) {\n`;
-      body += `  const html = Template(data, options);\n`;
+      body += `  var html = Template(data, options);\n`;
       body += `  return (asString || (typeof $ === 'undefined')) ? html : $(html);\n`;
       body += `};\n`;
 
