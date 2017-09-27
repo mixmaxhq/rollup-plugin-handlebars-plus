@@ -70,13 +70,15 @@ function handlebars(options) {
         template = template.code;
       }
 
-      var body = `import Handlebars from '${options.handlebars.id}';\n`;
-      if (options.jquery) body += `import $ from '${options.jquery}';\n`;
+      var escapePath = path => path.replace(/\\/g, '\\\\');
+
+      var body = `import Handlebars from '${escapePath(options.handlebars.id)}';\n`;
+      if (options.jquery) body += `import $ from '${escapePath(options.jquery)}';\n`;
 
       if (options.helpers) {
         // Support `helpers` being singular or plural.
         [].concat(options.helpers).forEach((helpers, i) => {
-          body += `import Helpers${i} from '${helpers}';\n`;
+          body += `import Helpers${i} from '${escapePath(helpers)}';\n`;
           body += `if (!Helpers${i}.__initialized) {\n`;
           body += `  Helpers${i}(Handlebars);\n`;
           body += `  Helpers${i}.__initialized = true;\n`;
@@ -86,7 +88,7 @@ function handlebars(options) {
 
       for (var partial of scanner.partials) {
         // Register the partial dependencies as partials.
-        body += `import '${partial}${options.templateExtension}';\n`;
+        body += `import '${escapePath(partial)}${options.templateExtension}';\n`;
       }
 
       body += `var Template = Handlebars.template(${template});\n`;
