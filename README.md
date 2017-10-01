@@ -256,10 +256,3 @@ needed to be compatible with our use of Handlebars template pre-Rollup. We
 `rollup-plugin-handlebars`, then got blocked and made a solution (this plugin) that was specific
 to our needs, then worked to make this more generic again (we think). We kept this as a separate
 project since the code had become by that point very different.
-
-## Release History
-
-* 0.2.1 Use `var` in exported JS to improve compatibility
-* 0.2.0 Expose default runtime ID as `handlebars.runtimeId`
-* 0.1.1 Simplify runtime import
-* 0.1.0 Initial release.
