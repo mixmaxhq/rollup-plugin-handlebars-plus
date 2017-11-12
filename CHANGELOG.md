@@ -1,5 +1,7 @@
 ## Release History
 
+* 0.2.3 Don't override options.jquery if jQuery is global (@xcambar - #9)
+
 * 0.2.2 Fix Windows compatibility (@mohd-akram - #8)
 
 * 0.2.1 Use `var` in exported JS to improve compatibility
