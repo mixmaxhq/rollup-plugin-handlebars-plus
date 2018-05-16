@@ -12,13 +12,13 @@ Features:
 
 ## Installation
 
-`yarn add rollup-plugin-handlebars-plus`
+`npm install rollup-plugin-handlebars-plus`
 or
 `npm install rollup-plugin-handlebars-plus --save`
 
 To use the plugin's copy of the Handlebars runtime, you'll also need to do:
 
-`yarn add rollup-plugin-node-resolve rollup-plugin-commonjs`
+`npm install rollup-plugin-node-resolve rollup-plugin-commonjs`
 or
 `npm install rollup-plugin-node-resolve rollup-plugin-commonjs --save`
 
