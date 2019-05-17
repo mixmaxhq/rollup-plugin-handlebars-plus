@@ -1,4 +1,5 @@
 ## Release History
+* 0.2.4 Change handlebars dependency as peerDependency to be able to install custom supported version
 
 * 0.2.3 Don't override options.jquery if jQuery is global (@xcambar - #9)
 

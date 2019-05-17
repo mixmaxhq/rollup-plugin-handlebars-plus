@@ -16,6 +16,12 @@ Features:
 or
 `npm install rollup-plugin-handlebars-plus --save`
 
+Handlebars is a peerDependency, so you should install your prefered version like:
+
+`npm install handlebars`
+or
+`npm install handlebars@4.0.5`
+
 To use the plugin's copy of the Handlebars runtime, you'll also need to do:
 
 `npm install rollup-plugin-node-resolve rollup-plugin-commonjs`

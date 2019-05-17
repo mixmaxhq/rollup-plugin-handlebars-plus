@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-handlebars-plus",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Rollup plugin to compile Handlebars templates including support for partials and more.",
   "main": "src/index.js",
   "scripts": {
@@ -24,7 +24,7 @@
     "url": "https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/issues"
   },
   "homepage": "https://github.com/mixmaxhq/rollup-plugin-handlebars-plus#readme",
-  "dependencies": {
-    "handlebars": "^4.0.5"
+  "peerDependencies": {
+    "handlebars": ">=3.0.0 < 5"
   }
 }
