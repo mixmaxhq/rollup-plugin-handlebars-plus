@@ -1,6 +1,6 @@
 {
   "name": "rollup-plugin-handlebars-plus",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "Rollup plugin to compile Handlebars templates including support for partials and more.",
   "main": "src/index.js",
   "scripts": {
