@@ -49,7 +49,7 @@ rollup({
         id: 'handlebars', // Default: the path of Handlebars' CJS definition within this module
 
         // Custom handlebars compiler if the built in version is not proper
-        module: require('handlebars')
+        module: require('handlebars'),
 
         // Options to pass to Handlebars' `parse` and `precompile` methods.
         options: {
