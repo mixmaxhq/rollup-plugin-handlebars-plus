@@ -1,5 +1,3 @@
-var Handlebars = require('handlebars');
-var ImportScanner = require('./ImportScanner');
 var path = require('path');
 
 // The default module ID of the Handlebars runtime--the path of its CJS definition within this module.
@@ -49,6 +47,9 @@ function handlebars(options) {
   options.handlebars.options = Object.assign({
     sourceMap: true
   }, options.handlebars.options);
+
+  const Handlebars = options.handlebars.module || require('handlebars');
+  const ImportScanner = require('./ImportScanner')(Handlebars);
 
   return {
     transform(code, id) {
