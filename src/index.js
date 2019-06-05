@@ -46,7 +46,7 @@ function handlebars(options) {
       id: options.handlebars
     };
   } else if (options.handlebars.module && !options.handlebars.id) {
-    throw new Error('You should define Handlebars runtime in options.handlbars.id, if you use custom Handlebars compiler!');
+    throw new Error('You should define Handlebars runtime in options.handlebars.id, if you use custom Handlebars compiler!');
   } else {
     options.handlebars = {
       id: DEFAULT_HANDLEBARS_ID,
