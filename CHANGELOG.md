@@ -1,6 +1,6 @@
 ## Release History
 
-- 0.3.0 Add extra config parameter to be able to define custom handlebars compiler
+- 0.2.4 Add extra config parameter to be able to define custom handlebars compiler
 
 - 0.2.3 Don't override options.jquery if jQuery is global (@xcambar - #9)
 
