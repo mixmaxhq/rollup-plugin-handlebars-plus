@@ -1,5 +1,3 @@
-var Handlebars = require('handlebars');
-var ImportScanner = require('./ImportScanner');
 var path = require('path');
 
 // The default module ID of the Handlebars runtime--the path of its CJS definition within this module.
@@ -18,6 +16,7 @@ var DEFAULT_HANDLEBARS_ID = path.relative(consumerNodeModules, require.resolve('
  *   @param {String=} options.handlebars.id - The module ID of the Handlebars runtime. Defaults to
  *     the path of its UMD definition within this module, which guarantees compatibility and will
  *     be simple for you _assuming_ you're using `rollup-plugin-node-resolve` and `rollup-plugin-commonjs`.
+ *   @param {Object=} options.handlebars.module - Custom handlebars compiler if the built in version is not proper
  *   @param {Object=} options.handlebars.options - Options to pass to Handlebars' parse and precompile
  *     steps.
  *    @param {Boolean=true} options.handlebars.options.sourceMap - Whether to generate sourcemaps.
@@ -42,13 +41,25 @@ function handlebars(options) {
     isPartial: (name) => name.startsWith('_')
   }, options);
 
-  options.handlebars = Object.assign({
-    id: (typeof options.handlebars === 'string') ? options.handlebars : DEFAULT_HANDLEBARS_ID
-  }, options.handlebars);
+  if (typeof options.handlebars === 'string') {
+    options.handlebars = {
+      id: options.handlebars
+    };
+  } else if (options.handlebars.module && !options.handlebars.id) {
+    throw new Error('Handlebars runtime should be defined in options.handlebars.id, if custom Handlebars compiler is used!');
+  } else {
+    options.handlebars = {
+      id: DEFAULT_HANDLEBARS_ID,
+      ...options.handlebars
+    };
+  }
 
   options.handlebars.options = Object.assign({
     sourceMap: true
   }, options.handlebars.options);
+
+  const Handlebars = options.handlebars.module || require('handlebars');
+  const ImportScanner = require('./ImportScanner')(Handlebars);
 
   return {
     transform(code, id) {
