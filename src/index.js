@@ -41,9 +41,18 @@ function handlebars(options) {
     isPartial: (name) => name.startsWith('_')
   }, options);
 
-  options.handlebars = Object.assign({
-    id: (typeof options.handlebars === 'string') ? options.handlebars : DEFAULT_HANDLEBARS_ID
-  }, options.handlebars);
+  if (typeof options.handlebars === 'string') {
+    options.handlebars = {
+      id: options.handlebars
+    };
+  } else if (options.handlebars.module && !options.handlebars.id) {
+    throw new Error('You should define Handlebars runtime in options.handlbars.id, if you use custom Handlebars compiler!');
+  } else {
+    options.handlebars = {
+      id: DEFAULT_HANDLEBARS_ID,
+      ...options.handlebars
+    };
+  }
 
   options.handlebars.options = Object.assign({
     sourceMap: true
