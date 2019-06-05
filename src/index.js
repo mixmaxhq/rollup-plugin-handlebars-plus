@@ -16,7 +16,9 @@ var DEFAULT_HANDLEBARS_ID = path.relative(consumerNodeModules, require.resolve('
  *   @param {String=} options.handlebars.id - The module ID of the Handlebars runtime. Defaults to
  *     the path of its UMD definition within this module, which guarantees compatibility and will
  *     be simple for you _assuming_ you're using `rollup-plugin-node-resolve` and `rollup-plugin-commonjs`.
- *   @param {Object=} options.handlebars.module - Custom handlebars compiler if the built in version is not proper
+ *   @param {Object=} options.handlebars.module - Custom handlebars compiler if the built in version
+ *     is not proper. If you pass this, you must also pass `id`, to ensure that the compiler and
+ *     runtime versions match.
  *   @param {Object=} options.handlebars.options - Options to pass to Handlebars' parse and precompile
  *     steps.
  *    @param {Boolean=true} options.handlebars.options.sourceMap - Whether to generate sourcemaps.
