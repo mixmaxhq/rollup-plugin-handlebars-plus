@@ -1,0 +1,7 @@
+{
+  "extends": ["mixmax/node", "mixmax/prettier"],
+  "rules": {
+    "consistent-return": "off",
+    "no-var": "error"
+  }
+}
