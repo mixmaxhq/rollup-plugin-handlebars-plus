@@ -1,11 +1,14 @@
-var path = require('path');
+const path = require('path');
 
 // The default module ID of the Handlebars runtime--the path of its CJS definition within this module.
 // Note that it needs to be relative to our consumer's `node_modules` directory not absolute, or
 // else we'll bypass the `rollup-plugin-commonjs` configuration of `include: 'node_modules/**'`
 // and `rollup-plugin-babel` configuration of `exclude: 'node_modules/**'`.
-var consumerNodeModules = path.join(__dirname, '../..');
-var DEFAULT_HANDLEBARS_ID = path.relative(consumerNodeModules, require.resolve('handlebars/runtime'));
+const consumerNodeModules = path.join(__dirname, '../..');
+const DEFAULT_HANDLEBARS_ID = path.relative(
+  consumerNodeModules,
+  require.resolve('handlebars/runtime')
+);
 
 /**
  * Constructs a Rollup plugin to compile Handlebars templates.
@@ -38,27 +41,35 @@ var DEFAULT_HANDLEBARS_ID = path.relative(consumerNodeModules, require.resolve('
  *   https://github.com/rollup/rollup/wiki/Plugins#creating-plugins
  */
 function handlebars(options) {
-  options = Object.assign({
-    templateExtension: '.hbs',
-    isPartial: (name) => name.startsWith('_')
-  }, options);
+  options = Object.assign(
+    {
+      templateExtension: '.hbs',
+      isPartial: (name) => name.startsWith('_'),
+    },
+    options
+  );
 
   if (typeof options.handlebars === 'string') {
     options.handlebars = {
-      id: options.handlebars
+      id: options.handlebars,
     };
   } else if (options.handlebars.module && !options.handlebars.id) {
-    throw new Error('Handlebars runtime should be defined in options.handlebars.id, if custom Handlebars compiler is used!');
+    throw new Error(
+      'Handlebars runtime should be defined in options.handlebars.id, if custom Handlebars compiler is used!'
+    );
   } else {
     options.handlebars = {
       id: DEFAULT_HANDLEBARS_ID,
-      ...options.handlebars
+      ...options.handlebars,
     };
   }
 
-  options.handlebars.options = Object.assign({
-    sourceMap: true
-  }, options.handlebars.options);
+  options.handlebars.options = Object.assign(
+    {
+      sourceMap: true,
+    },
+    options.handlebars.options
+  );
 
   const Handlebars = options.handlebars.module || require('handlebars');
   const ImportScanner = require('./ImportScanner')(Handlebars);
@@ -67,25 +78,26 @@ function handlebars(options) {
     transform(code, id) {
       if (!id.endsWith(options.templateExtension)) return;
 
-      var name = id.split('/').pop(),
+      const name = id.split('/').pop(),
         tree = Handlebars.parse(code, options.handlebars.options);
 
-      var scanner = new ImportScanner();
+      const scanner = new ImportScanner();
       scanner.accept(tree);
 
-      var precompileOptions = options.handlebars.options;
+      const precompileOptions = options.handlebars.options;
       if (precompileOptions.sourceMap && !precompileOptions.srcName) {
         precompileOptions.srcName = name;
       }
-      var template = Handlebars.precompile(tree, precompileOptions), map = null;
+      let template = Handlebars.precompile(tree, precompileOptions),
+        map = null;
       if (precompileOptions.sourceMap) {
         map = template.map;
         template = template.code;
       }
 
-      var escapePath = path => path.replace(/\\/g, '\\\\');
+      const escapePath = (path) => path.replace(/\\/g, '\\\\');
 
-      var body = `import Handlebars from '${escapePath(options.handlebars.id)}';\n`;
+      let body = `import Handlebars from '${escapePath(options.handlebars.id)}';\n`;
       if (options.jquery) body += `import $ from '${escapePath(options.jquery)}';\n`;
 
       if (options.helpers) {
@@ -99,7 +111,7 @@ function handlebars(options) {
         });
       }
 
-      for (var partial of scanner.partials) {
+      for (const partial of scanner.partials) {
         // Register the partial dependencies as partials.
         body += `import '${escapePath(partial)}${options.templateExtension}';\n`;
       }
@@ -107,10 +119,10 @@ function handlebars(options) {
       body += `var Template = Handlebars.template(${template});\n`;
 
       if (options.isPartial(name)) {
-        var partialName = id;
+        let partialName = id;
         if (options.partialRoot) {
           // Support `partialRoot` being singular or plural.
-          for (var partialRoot of [].concat(options.partialRoot)) {
+          for (const partialRoot of [].concat(options.partialRoot)) {
             if (id.startsWith(partialRoot)) {
               partialName = partialName.slice(partialRoot.length);
               break;
@@ -130,9 +142,9 @@ function handlebars(options) {
 
       return {
         code: body,
-        map: map || {mappings: ''}
+        map: map || { mappings: '' },
       };
-    }
+    },
   };
 }
 
