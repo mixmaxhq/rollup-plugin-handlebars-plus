@@ -1,3 +1,10 @@
+### [0.2.5](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/compare/v0.2.4...v0.2.5) (2019-11-15)
+
+
+### Bug Fixes
+
+* **opts:** check that options.handlebars is defined ([fcc1e8a](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/commit/fcc1e8ac42b322abae5f9e1422a765a2cdfec72c))
+
 ## Release History
 
 - 0.2.4 Add extra config parameter to be able to define custom handlebars compiler
