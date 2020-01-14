@@ -38,7 +38,7 @@
     "@mixmaxhq/prettier-config": "^1.0.0",
     "@mixmaxhq/semantic-release-config": "^1.2.2",
     "cz-conventional-changelog": "^3.0.2",
-    "eslint": "^6.6.0",
+    "eslint": "^6.8.0",
     "eslint-config-mixmax": "^3.4.0",
     "prettier": "^1.19.1",
     "semantic-release": "^15.13.30"
