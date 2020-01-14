@@ -33,7 +33,7 @@
     "handlebars": "^4.0.5"
   },
   "devDependencies": {
-    "@commitlint/config-conventional": "^8.3.3",
+    "@commitlint/config-conventional": "^8.3.4",
     "@mixmaxhq/commitlint-jenkins": "^1.4.2",
     "@mixmaxhq/prettier-config": "^1.0.0",
     "@mixmaxhq/semantic-release-config": "^1.2.2",
