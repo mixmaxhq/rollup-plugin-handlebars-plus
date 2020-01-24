@@ -41,7 +41,7 @@
     "eslint": "^6.8.0",
     "eslint-config-mixmax": "^4.6.0",
     "prettier": "^1.19.1",
-    "semantic-release": "^15.13.30"
+    "semantic-release": "^16.0.3"
   },
   "config": {
     "commitizen": {
