@@ -30,7 +30,7 @@
   },
   "homepage": "https://github.com/mixmaxhq/rollup-plugin-handlebars-plus#readme",
   "dependencies": {
-    "handlebars": "^4.3.0"
+    "handlebars": "^4.7.3"
   },
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
