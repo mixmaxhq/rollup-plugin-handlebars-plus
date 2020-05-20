@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = (Handlebars) => {
+export default (Handlebars) =>
   /**
    * Visit all the static partial-template imports, and collect them in an array.
    *
@@ -27,7 +27,4 @@ module.exports = (Handlebars) => {
 
       return super.PartialStatement(partial);
     }
-  }
-
-  return ImportScanner;
-};
+  };

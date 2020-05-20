@@ -1,4 +1,12 @@
-const path = require('path');
+import path from 'path';
+
+import { babel } from '@rollup/plugin-babel';
+import jsesc from 'jsesc';
+import { rollup } from 'rollup';
+import prettier from 'rollup-plugin-prettier';
+
+import helperSource from './helpers.include.js';
+import ImportScanner_ from './ImportScanner';
 
 // The default module ID of the Handlebars runtime--the path of its CJS definition within this module.
 // Note that it needs to be relative to our consumer's `node_modules` directory not absolute, or
@@ -9,6 +17,30 @@ const DEFAULT_HANDLEBARS_ID = path.relative(
   consumerNodeModules,
   require.resolve('handlebars/runtime')
 );
+
+const PLUGIN_HELPER_MODULE_ID = '\0rollupPluginHandlebarsPlusHelpers.js';
+const PLUGIN_GENERATED_MODULE_ID = '\0rollupPluginHandlebarsPlusGenerated.js';
+
+function getFormatsFromOptions(options) {
+  if (Array.isArray(options.formats)) {
+    const formats = {};
+    for (const format of options.formats) {
+      formats[format] = true;
+    }
+    return formats;
+  }
+  return options.formats || {};
+}
+
+function getValidFormats(options) {
+  const formats = getFormatsFromOptions(options);
+  return {
+    element: !!formats.element,
+    fragment: !!formats.fragment,
+    jquery: !!(options.jquery || formats.jquery),
+    string: true,
+  };
+}
 
 /**
  * Constructs a Rollup plugin to compile Handlebars templates.
@@ -40,7 +72,7 @@ const DEFAULT_HANDLEBARS_ID = path.relative(
  * @return {Object} The rollup plugin object, as documented on the wiki:
  *   https://github.com/rollup/rollup/wiki/Plugins#creating-plugins
  */
-function handlebars(options) {
+export function handlebars(options) {
   options = Object.assign(
     {
       templateExtension: '.hbs',
@@ -72,13 +104,119 @@ function handlebars(options) {
   );
 
   const Handlebars = options.handlebars.module || require('handlebars');
-  const ImportScanner = require('./ImportScanner')(Handlebars);
+  const ImportScanner = ImportScanner_(Handlebars);
+
+  const validFormats = getValidFormats(options);
+
+  const jqueryPath =
+    typeof options.jquery === 'string' ? options.jquery : validFormats.jquery ? 'jquery' : null;
+
+  const escapePath = (path) => jsesc(path, { minimal: true });
+
+  function generateHelperModule() {
+    const defaultFormat = validFormats.jquery ? 'jquery' : 'string';
+
+    // TODO: figure out how to let valid_ get eliminated. It works if it's a bare object.
+    let body = `const valid = Object.create(null);\n`;
+    for (const [key, value] of Object.entries(validFormats)) {
+      if (value) {
+        body += `valid.${key} = ${value};\n`;
+      }
+      // Export a bare copy of the valid boolean so we can do dead code elimination.
+      body += `export const ${key}Valid = ${value};\n`;
+    }
+    body += `export const defaultFormat = ${jsesc(defaultFormat, { wrap: true })};\n`;
+
+    body += `import Handlebars from 'handlebars';\n`;
+    if (options.helpers) {
+      // Support `helpers` being singular or plural.
+      for (const [i, helpers] of [].concat(options.helpers).entries()) {
+        body += `import Helpers${i} from '${escapePath(helpers)}';\n`;
+        body += `if (!Helpers${i}.__initialized) {\n`;
+        body += `  Helpers${i}(Handlebars);\n`;
+        body += `  Helpers${i}.__initialized = true;\n`;
+        body += `}\n`;
+      }
+    }
+    body += `export { valid, Handlebars };\n`;
+
+    return body;
+  }
 
   return {
-    transform(code, id) {
-      if (!id.endsWith(options.templateExtension)) return;
+    resolveId(id) {
+      return id === PLUGIN_HELPER_MODULE_ID ? id : null;
+    },
 
-      const name = id.split('/').pop(),
+    async load(id) {
+      if (id === PLUGIN_HELPER_MODULE_ID) {
+        const bundle = await rollup({
+          input: 'helpers.js',
+          external: (id) =>
+            ['handlebars', 'jquery'].includes(id) || id.startsWith('@babel/runtime/'),
+          treeshake: {
+            moduleSideEffects: 'no-external',
+            propertyReadSideEffects: false,
+          },
+          plugins: [
+            {
+              resolveId: (id) =>
+                ['helpers.js', PLUGIN_GENERATED_MODULE_ID].includes(id) ? id : null,
+              load: (id) =>
+                id === 'helpers.js'
+                  ? helperSource
+                  : id === PLUGIN_GENERATED_MODULE_ID
+                  ? generateHelperModule()
+                  : null,
+            },
+            babel({
+              babelHelpers: options.babelHelpers || 'bundled',
+              configFile: false,
+              presets: [
+                ['@babel/preset-env', { loose: true }],
+                // Collapse constants to remove unnecessary code depending on the configuration.
+                [
+                  'minify',
+                  {
+                    booleans: false,
+                    builtIns: false,
+                    mangle: false,
+                    simplify: false,
+                    simplifyComparisons: false,
+                  },
+                ],
+              ],
+              plugins:
+                options.babelHelpers === 'runtime'
+                  ? [['@babel/plugin-transform-runtime', options.babelRuntime]]
+                  : [],
+            }),
+            prettier({
+              // Prefer the configuration in rollup-plugin-handlebars-plus.
+              cwd: __dirname,
+              filepath: `${__dirname}/helpers.js`,
+            }),
+          ],
+        });
+
+        const { output } = await bundle.generate({
+          format: 'es',
+          paths: {
+            handlebars: options.handlebars.id,
+            jquery: jqueryPath,
+          },
+        });
+        // TODO: sourcemaps?
+        return output[0];
+      }
+
+      if (id !== PLUGIN_GENERATED_MODULE_ID) return null;
+    },
+
+    transform(code, id) {
+      if (id === PLUGIN_HELPER_MODULE_ID || !id.endsWith(options.templateExtension)) return;
+
+      const name = id.slice(id.lastIndexOf('/') + 1),
         tree = Handlebars.parse(code, options.handlebars.options);
 
       const scanner = new ImportScanner();
@@ -95,21 +233,9 @@ function handlebars(options) {
         template = template.code;
       }
 
-      const escapePath = (path) => path.replace(/\\/g, '\\\\');
-
-      let body = `import Handlebars from '${escapePath(options.handlebars.id)}';\n`;
-      if (options.jquery) body += `import $ from '${escapePath(options.jquery)}';\n`;
-
-      if (options.helpers) {
-        // Support `helpers` being singular or plural.
-        [].concat(options.helpers).forEach((helpers, i) => {
-          body += `import Helpers${i} from '${escapePath(helpers)}';\n`;
-          body += `if (!Helpers${i}.__initialized) {\n`;
-          body += `  Helpers${i}(Handlebars);\n`;
-          body += `  Helpers${i}.__initialized = true;\n`;
-          body += `}\n`;
-        });
-      }
+      let body = `import { Handlebars, getFormat, parsers } from '${escapePath(
+        PLUGIN_HELPER_MODULE_ID
+      )}';\n`;
 
       for (const partial of scanner.partials) {
         // Register the partial dependencies as partials.
@@ -135,10 +261,29 @@ function handlebars(options) {
         body += `Handlebars.registerPartial('${partialName}', Template);\n`;
       }
 
-      body += `export default function(data, options, asString) {\n`;
-      body += `  var html = Template(data, options);\n`;
-      body += `  return (asString || ${!options.jquery}) ? html : $(html);\n`;
-      body += `};\n`;
+      const gen = `Template(data, options)`;
+
+      if (validFormats.element || validFormats.fragment || validFormats.jquery) {
+        body += `export default function(data, options, asString) {\n`;
+        body += `  var format, parser;\n`;
+        body += `  format = getFormat(options, asString);\n`;
+        body += `  options = format[0];\n`;
+        body += `  format = format[1];\n`;
+        body += `  parser = parsers[format];\n`;
+        body += `  var html = ${gen};\n`;
+        body += `  return parser ? parser(html) : html;\n`;
+        body += `};\n`;
+      } else {
+        body += `export default Template;\n`;
+        // body += `  return ${gen};\n`;
+      }
+
+      for (const [format, enabled] of Object.entries(validFormats)) {
+        if (!enabled) continue;
+        body += `export function ${format}(data, options) {\n`;
+        body += `  return ${format === 'string' ? gen : `(0, parsers.${format})(${gen})`};\n`;
+        body += `}\n`;
+      }
 
       return {
         code: body,
@@ -149,6 +294,4 @@ function handlebars(options) {
 }
 
 // In case the consumer needs it.
-handlebars.runtimeId = DEFAULT_HANDLEBARS_ID;
-
-module.exports = handlebars;
+export const runtimeId = DEFAULT_HANDLEBARS_ID;

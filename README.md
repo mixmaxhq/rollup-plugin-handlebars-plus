@@ -4,11 +4,11 @@
 
 Features:
 
-* Import Handlebars templates as ES6 modules
-* Support for Handlebars [helpers](#helpers) and partials
-* [Precompiles](http://handlebarsjs.com/precompilation.html) templates so your application only needs the Handlebars runtime
-* Handlebars runtime [included](#handlebars)
-* Optional rendering to [jQuery collections](#jquery) vs. raw strings
+- Import Handlebars templates as ES6 modules
+- Support for Handlebars [helpers](#helpers) and partials
+- [Precompiles](http://handlebarsjs.com/precompilation.html) templates so your application only needs the Handlebars runtime
+- Handlebars runtime [included](#handlebars)
+- Optional rendering to [jQuery collections](#jquery) vs. raw strings
 
 ## Installation
 
@@ -27,19 +27,18 @@ See [here](#handlebars) for more information.
 ## Usage
 
 ```js
-var rollup = require('rollup');
-var handlebars = require('rollup-plugin-handlebars-plus');
-var rootImport = require('rollup-plugin-root-import');
+import { rollup } from 'rollup';
+import { handlebars } from 'rollup-plugin-handlebars-plus';
+import rootImport from 'rollup-plugin-root-import';
 
-
-var partialRoots = [`${__dirname}/src/client/js/views/`, `${__dirname}/src/common/views/`];
+const partialRoots = [`${__dirname}/src/client/js/views/`, `${__dirname}/src/common/views/`];
 
 rollup({
   entry: 'main.js',
   plugins: [
     // Required by use of `partialRoot` below.
     rootImport({
-      root: partialRoots
+      root: partialRoots,
     }),
     handlebars({
       handlebars: {
@@ -55,8 +54,8 @@ rollup({
         // Options to pass to Handlebars' `parse` and `precompile` methods.
         options: {
           // Whether to generate sourcemaps for the templates
-          sourceMap: true // Default: true
-        }
+          sourceMap: true, // Default: true
+        },
       },
 
       // The ID(s) of modules to import before every template, see the "Helpers" section below.
@@ -74,10 +73,10 @@ rollup({
       partialRoot: partialRoots, // Default: none
 
       // The module ID of jQuery, see the "jQuery" section below.
-      jquery: 'jquery' // Default: none
-    })
-  ]
-})
+      jquery: 'jquery', // Default: none
+    }),
+  ],
+});
 ```
 
 lets you do this:
@@ -107,23 +106,23 @@ import before every template. They should export as `default` a function that ac
 runtime as argument, letting them register helpers. Each such export will only be invoked once.
 
 ```js
-var rollup = require('rollup');
-var handlebars = require('rollup-plugin-handlebars-plus');
+import { rollup } from 'rollup';
+import { handlebars } from 'rollup-plugin-handlebars-plus';
 
 rollup({
   entry: 'main.js',
   plugins: [
     handlebars({
-      helpers: ['/utils/HandlebarsHelpers.js']
-    })
-  ]
-})
+      helpers: ['/utils/HandlebarsHelpers.js'],
+    }),
+  ],
+});
 ```
 
 ```js
 // /utils/HandlebarsHelpers.js
-export default function(Handlebars) {
-  Handlebars.registerHelper('encodeURIComponent', function(text) {
+export default function (Handlebars) {
+  Handlebars.registerHelper('encodeURIComponent', function (text) {
     return new Handlebars.SafeString(encodeURIComponent(text));
   });
 }
@@ -156,21 +155,21 @@ The tradeoff is that the plugin's copy of the runtime is a CJS module, so to loa
 need to install `rollup-plugin-node-resolve` and `rollup-plugin-commonjs`:
 
 ```js
-var rollup = require('rollup');
-var nodeResolve = require('rollup-plugin-node-resolve');
-var commonjs = require('rollup-plugin-commonjs');
-var handlebars = require('rollup-plugin-handlebars-plus');
+import { rollup } from 'rollup';
+import resolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
+import { handlebars } from 'rollup-plugin-handlebars-plus';
 
 rollup({
   entry: 'main.js',
   plugins: [
-    nodeResolve(),
+    resolve(),
     commonjs({
       include: 'node_modules/**',
     }),
-    handlebars()
-  ]
-})
+    handlebars(),
+  ],
+});
 ```
 
 In case you need the default runtime ID, it's available as `handlebars.runtimeId`. This might be
@@ -189,11 +188,11 @@ by passing it to an API that expects such like
 import Backbone from 'backbone';
 import Template from './index.html';
 
-var MyView = Backbone.View.extend({
+const MyView = Backbone.View.extend({
   render() {
     this.setElement(Template());
-  }
-})
+  },
+});
 ```
 
 or by customizing the template using jQuery's APIs:
@@ -202,11 +201,11 @@ or by customizing the template using jQuery's APIs:
 import $ from 'jquery';
 import TooltipTemplate from './popdown.html';
 
-var tooltip = TooltipTemplate();
+const tooltip = TooltipTemplate();
 
 tooltip.css({
   left: 50,
-  top: 100
+  top: 100,
 });
 
 $('body').append(tooltip);
@@ -216,30 +215,57 @@ What makes this possible is providing the module ID of jQuery (that you've bundl
 this plugin, using the `jquery` option:
 
 ```js
-var rollup = require('rollup');
-var handlebars = require('rollup-plugin-handlebars-plus');
+import { rollup } from 'rollup';
+import { handlebars } from 'rollup-plugin-handlebars-plus';
 
 rollup({
   entry: 'main.js',
   plugins: [
     handlebars({
-      jquery: 'jquery'
-    })
-  ]
-})
+      jquery: 'jquery',
+    }),
+  ],
+});
 ```
 
 Curious about how to ID jQuery when it's a global i.e. you're _not_ bundling it?
 [Here's a Gist for that.](https://gist.github.com/wearhere/a3684edd54787b698029e42ea6ccc0f3)
 
-In case you want to render to a string even when using this option, all precompiled template functions
-have the signature `(data, options, asString)` so you can do:
+In case you want to render to a string even when using this option, all precompiled template
+functions support an additional `format` option so you can do:
 
 ```js
 import Template from './index.html';
 
-console.log(Template({}, {}, true));
+console.log(Template({}, { format: 'string' }));
 ```
+
+### Fragments and Elements
+
+It can also be helpful to render a template to a `DocumentFragment`, which is supported by the
+`format` option:
+
+```js
+import Template from './index.html';
+
+document.body.append(Template({}, { format: 'fragment' }));
+```
+
+Or to take the first element from that fragment:
+
+```js
+import Template from './index.html';
+
+document.body.append(Template({}, { format: 'element' }));
+```
+
+### Babel Helpers
+
+If you use `@babel/runtime` elsewhere in your project and have it as a dependency, you can benefit
+by passing `babelHelpers: 'runtime'` in the `options`, which will have the internal babel transforms
+for generated code use the common helpers. This does not apply if you don't use any of the non-
+string formats (i.e. only use handlebars to produce strings). Use the `babelRuntime` option to pass
+options to `@babel/plugin-transform-runtime`.
 
 ## Contributing
 
@@ -247,7 +273,7 @@ We welcome pull requests! Please lint your code using the JSHint configuration i
 
 ## Credits
 
-Created by [Eli Skeggs](https://eliskeggs.com/) and [Jeff Wear](https://twitter.com/wear_here).
+Created by [Eli Skeggs](https://eliskeggs.com) and [Jeff Wear](https://twitter.com/wear_here).
 
 Prior art: https://github.com/jibhaine/rollup-plugin-handlebars.
 
