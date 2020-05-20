@@ -29,8 +29,12 @@
     "url": "https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/issues"
   },
   "homepage": "https://github.com/mixmaxhq/rollup-plugin-handlebars-plus#readme",
+  "engines": {
+    "node": ">=8.3.0"
+  },
   "dependencies": {
-    "handlebars": "^4.3.0"
+    "handlebars": "^4.7.6",
+    "jsesc": "^3.0.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",

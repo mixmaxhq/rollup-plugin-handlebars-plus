@@ -1,4 +1,5 @@
 const path = require('path');
+const jsesc = require('jsesc');
 
 // The default module ID of the Handlebars runtime--the path of its CJS definition within this module.
 // Note that it needs to be relative to our consumer's `node_modules` directory not absolute, or
@@ -9,6 +10,29 @@ const DEFAULT_HANDLEBARS_ID = path.relative(
   consumerNodeModules,
   require.resolve('handlebars/runtime')
 );
+
+const PLUGIN_HELPER_MODULE_ID = '\0rollupPluginHandlebarsPlusHelpers.js';
+
+function getFormatsFromOptions(options) {
+  if (Array.isArray(options.formats)) {
+    const formats = {};
+    for (const format of options.formats) {
+      formats[format] = true;
+    }
+    return formats;
+  }
+  return options.formats || {};
+}
+
+function getValidFormats(options) {
+  const formats = getFormatsFromOptions(options);
+  return {
+    element: !!formats.element,
+    fragment: !!formats.fragment,
+    jquery: !!(options.jquery || formats.jquery),
+    string: true,
+  };
+}
 
 /**
  * Constructs a Rollup plugin to compile Handlebars templates.
@@ -74,9 +98,71 @@ function handlebars(options) {
   const Handlebars = options.handlebars.module || require('handlebars');
   const ImportScanner = require('./ImportScanner')(Handlebars);
 
+  const validFormats = getValidFormats(options),
+    usesFragmentParsing = validFormats.element || validFormats.fragment;
+
+  const jqueryPath =
+    typeof options.jquery === 'string' ? options.jquery : validFormats.jquery ? 'jquery' : null;
+
   return {
+    resolveId(id) {
+      return id === PLUGIN_HELPER_MODULE_ID ? id : null;
+    },
+
+    load(id) {
+      if (id !== PLUGIN_HELPER_MODULE_ID) return null;
+
+      const defaultFormat = validFormats.jquery ? "'jquery'" : "'string'";
+
+      let body = `const valid = Object.create(null);\n`;
+      for (const [key, value] of Object.entries(validFormats)) {
+        body += `valid.${key} = ${value};\n`;
+      }
+      body += `const hasOwn = Object.prototype.hasOwnProperty;\n`;
+      if (usesFragmentParsing) {
+        body += `export const rangeForParsing = document.createRange();\n`;
+      }
+      if (validFormats.element) {
+        body += `function parseElement(html) {\n`;
+        body += `  const children = rangeForParsing.createContextualFragment(html).children;\n`;
+        body += `  if (children.length !== 1) throw new Error('element format received ' + `;
+        body += `children.length + 'elements, needs exactly one');\n`;
+        body += `  return children[0];\n`;
+        body += `}\n`;
+      }
+      if (validFormats.fragment) {
+        body += `function parseFragment(html) {\n`;
+        body += `  return rangeForParsing.createContextualFragment(html);\n`;
+        body += `}\n`;
+      }
+      body += `export function getFormat(options, asString) {\n`;
+      body += `  if (asString !== void 0) return [options, ${
+        validFormats.jquery ? "!asString ? 'jquery' : " : ''
+      }'string'];\n`;
+      body += `  if (!options) return [options, ${defaultFormat}];\n`;
+      body += `  var format = options.format || ${defaultFormat};\n`;
+      body += `  if (!valid[format]) throw new TypeError('unsupported format ' + format);\n`;
+      body += `  var restOptions = {};\n`;
+      body += `  for (const key in options) {\n`;
+      body += `    if (hasOwn.call(options, key) && key !== 'format') {\n`;
+      body += `      restOptions[key] = options[key];\n`;
+      body += `    }\n`;
+      body += `  }\n`;
+      body += `  return [restOptions, format];\n`;
+      body += `}\n`;
+      body += `export const parsers = {\n`;
+      const parsers = [];
+      if (validFormats.element) parsers.push('  element: parseElement');
+      if (validFormats.fragment) parsers.push('  fragment: parseFragment');
+      if (validFormats.jquery) parsers.push('  jquery: $');
+      body += parsers.join(',\n') + '\n';
+      body += `}\n;`;
+
+      return body;
+    },
+
     transform(code, id) {
-      if (!id.endsWith(options.templateExtension)) return;
+      if (id === PLUGIN_HELPER_MODULE_ID || !id.endsWith(options.templateExtension)) return;
 
       const name = id.split('/').pop(),
         tree = Handlebars.parse(code, options.handlebars.options);
@@ -95,25 +181,26 @@ function handlebars(options) {
         template = template.code;
       }
 
-      const escapePath = (path) => path.replace(/\\/g, '\\\\');
+      const escapePath = (path) => jsesc(path, { minimal: true, wrap: true });
 
-      let body = `import Handlebars from '${escapePath(options.handlebars.id)}';\n`;
-      if (options.jquery) body += `import $ from '${escapePath(options.jquery)}';\n`;
+      let body = `import Handlebars from ${escapePath(options.handlebars.id)};\n`;
+      if (jqueryPath) body += `import $ from ${escapePath(jqueryPath)};\n`;
+      body += `import { getFormat, parsers } from ${escapePath(PLUGIN_HELPER_MODULE_ID)};\n`;
 
       if (options.helpers) {
         // Support `helpers` being singular or plural.
-        [].concat(options.helpers).forEach((helpers, i) => {
-          body += `import Helpers${i} from '${escapePath(helpers)}';\n`;
+        for (const [i, helpers] of [].concat(options.helpers).entries()) {
+          body += `import Helpers${i} from ${escapePath(helpers)};\n`;
           body += `if (!Helpers${i}.__initialized) {\n`;
           body += `  Helpers${i}(Handlebars);\n`;
           body += `  Helpers${i}.__initialized = true;\n`;
           body += `}\n`;
-        });
+        }
       }
 
       for (const partial of scanner.partials) {
         // Register the partial dependencies as partials.
-        body += `import '${escapePath(partial)}${options.templateExtension}';\n`;
+        body += `import ${escapePath(partial)}${options.templateExtension};\n`;
       }
 
       body += `var Template = Handlebars.template(${template});\n`;
@@ -136,9 +223,24 @@ function handlebars(options) {
       }
 
       body += `export default function(data, options, asString) {\n`;
+      if (validFormats.element || validFormats.fragment || validFormats.jquery) {
+        body += `  var format, parser;\n`;
+        body += `  format = getFormat(options, asString);\n`;
+        body += `  options = format[0];\n`;
+        body += `  format = format[1];\n`;
+        body += `  parser = parsers[format];\n`;
+      }
       body += `  var html = Template(data, options);\n`;
-      body += `  return (asString || ${!options.jquery}) ? html : $(html);\n`;
+      body += `  return parser ? parser(html) : html;\n`;
       body += `};\n`;
+
+      for (const [format, enabled] of Object.entries(validFormats)) {
+        if (!enabled) continue;
+        body += `export function ${format}(data, options) {\n`;
+        body += `  var html = Template(data, options);\n`;
+        body += `  return (0, parsers.${format})(html);\n`;
+        body += `}\n`;
+      }
 
       return {
         code: body,

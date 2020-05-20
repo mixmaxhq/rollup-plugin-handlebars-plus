@@ -232,13 +232,32 @@ rollup({
 Curious about how to ID jQuery when it's a global i.e. you're _not_ bundling it?
 [Here's a Gist for that.](https://gist.github.com/wearhere/a3684edd54787b698029e42ea6ccc0f3)
 
-In case you want to render to a string even when using this option, all precompiled template functions
-have the signature `(data, options, asString)` so you can do:
+In case you want to render to a string even when using this option, all precompiled template
+functions support an additional `format` option so you can do:
 
 ```js
 import Template from './index.html';
 
-console.log(Template({}, {}, true));
+console.log(Template({}, { format: 'string' }));
+```
+
+### Fragments and Elements
+
+It can also be helpful to render a template to a `DocumentFragment`, which is supported by the
+`format` option:
+
+```js
+import Template from './index.html';
+
+document.body.append(Template({}, { format: 'fragment' }));
+```
+
+Or to take the first element from that fragment:
+
+```js
+import Template from './index.html';
+
+document.body.append(Template({}, { format: 'element' }));
 ```
 
 ## Contributing
