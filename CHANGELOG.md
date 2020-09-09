@@ -1,3 +1,10 @@
+## [0.4.0](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/compare/v0.3.0...v0.4.0) (2020-09-09)
+
+
+### Features
+
+* support pure helper definitions ([f38c9ea](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/commit/f38c9eab41476e8fead4107878b194f3239b53ff))
+
 ## [0.3.0](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/compare/v0.2.5...v0.3.0) (2020-09-09)
 
 
