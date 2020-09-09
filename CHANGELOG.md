@@ -1,3 +1,10 @@
+## [0.3.0](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/compare/v0.2.5...v0.3.0) (2020-09-09)
+
+
+### Features
+
+* mark generated Templates as pure ([e589ad2](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/commit/e589ad2de1d867e6106047ee5e0927d798524f54))
+
 ### [0.2.5](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/compare/v0.2.4...v0.2.5) (2019-11-15)
 
 
