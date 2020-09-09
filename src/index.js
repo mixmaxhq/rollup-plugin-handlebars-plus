@@ -10,6 +10,13 @@ const DEFAULT_HANDLEBARS_ID = path.relative(
   require.resolve('handlebars/runtime')
 );
 
+const INTERNAL_INIT_ID = '\0handlebarsPlusHelpersInit';
+
+const escapePath = (path) => path.replace(/\\/g, '\\\\');
+
+const nonEmptyOr = (array, fallback) => (array.length ? array : fallback);
+const asArrayOr = (value, fallback) => nonEmptyOr([].concat(value || []), fallback);
+
 /**
  * Constructs a Rollup plugin to compile Handlebars templates.
  *
@@ -74,7 +81,36 @@ function handlebars(options) {
   const Handlebars = options.handlebars.module || require('handlebars');
   const ImportScanner = require('./ImportScanner')(Handlebars);
 
+  const hbsImport = `import Handlebars from '${escapePath(options.handlebars.id)}';\n`;
+
+  const wrapTemplateDefinition = options.helpersPureInitialize
+    ? (defineTemplate, initExpr) =>
+        defineTemplate((expr) => `(function() {${initExpr};return ${expr};})()`)
+    : (defineTemplate, initExpr) => `${initExpr};\n${defineTemplate()}`;
+
+  // Support `helpers` being singular or plural.
+  const helpers = asArrayOr(options.helpers, null);
+
   return {
+    resolveId: (id) => (helpers && id === INTERNAL_INIT_ID ? id : undefined),
+
+    load(id) {
+      if (!helpers || id !== INTERNAL_INIT_ID) return;
+
+      let body = hbsImport;
+      body += '';
+
+      const initExpr = helpers.map((helperPath, i) => {
+        const ref = `Helpers${i}`;
+        body += `import ${ref} from '${escapePath(helperPath)}';\n`;
+        return `  ${ref}.__initialized || (${ref}(Handlebars), ${ref}.__initialized = true);\n`;
+      });
+
+      body += `export default function() {\n${initExpr.join('')}}\n`;
+
+      return { code: body, map: { mappings: '' } };
+    },
+
     transform(code, id) {
       if (!id.endsWith(options.templateExtension)) return;
 
@@ -95,28 +131,21 @@ function handlebars(options) {
         template = template.code;
       }
 
-      const escapePath = (path) => path.replace(/\\/g, '\\\\');
-
-      let body = `import Handlebars from '${escapePath(options.handlebars.id)}';\n`;
+      let body = hbsImport;
       if (options.jquery) body += `import $ from '${escapePath(options.jquery)}';\n`;
 
-      if (options.helpers) {
-        // Support `helpers` being singular or plural.
-        [].concat(options.helpers).forEach((helpers, i) => {
-          body += `import Helpers${i} from '${escapePath(helpers)}';\n`;
-          body += `if (!Helpers${i}.__initialized) {\n`;
-          body += `  Helpers${i}(Handlebars);\n`;
-          body += `  Helpers${i}.__initialized = true;\n`;
-          body += `}\n`;
-        });
-      }
+      body += `import init from '${INTERNAL_INIT_ID}';\n`;
 
       for (const partial of scanner.partials) {
         // Register the partial dependencies as partials.
         body += `import '${escapePath(partial)}${options.templateExtension}';\n`;
       }
 
-      body += `var Template = /*#__PURE__*/Handlebars.template(${template});\n`;
+      body += wrapTemplateDefinition(
+        (wrapExpression = (expr) => expr) =>
+          `var Template = /*#__PURE__*/${wrapExpression(`Handlebars.template(${template})`)};\n`,
+        'init()'
+      );
 
       if (options.isPartial(name)) {
         let partialName = id;

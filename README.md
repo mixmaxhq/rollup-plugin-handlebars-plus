@@ -62,6 +62,12 @@ rollup({
       // Can be a string too.
       helpers: ['/utils/HandlebarsHelpers.js'], // Default: none
 
+      // Whether to register the defined helpers at template declaration in a way that would allow
+      // the initialization call to be elided if the template is never used. Useful in a library
+      // context where the templates might all get tree-shaken away, leaving no need for the
+      // helpers. Does nothing if helpers is empty.
+      helpersPureInitialize: true, // Default: false
+
       // In case you want to compile files with other extensions.
       templateExtension: '.html', // Default: '.hbs'
 
