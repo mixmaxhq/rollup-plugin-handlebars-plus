@@ -4,11 +4,11 @@
 
 Features:
 
-* Import Handlebars templates as ES6 modules
-* Support for Handlebars [helpers](#helpers) and partials
-* [Precompiles](http://handlebarsjs.com/precompilation.html) templates so your application only needs the Handlebars runtime
-* Handlebars runtime [included](#handlebars)
-* Optional rendering to [jQuery collections](#jquery) vs. raw strings
+- Import Handlebars templates as ES6 modules
+- Support for Handlebars [helpers](#helpers) and partials
+- [Precompiles](http://handlebarsjs.com/precompilation.html) templates so your application only needs the Handlebars runtime
+- Handlebars runtime [included](#handlebars)
+- Optional rendering to [jQuery collections](#jquery) vs. raw strings
 
 ## Installation
 
@@ -31,7 +31,6 @@ var rollup = require('rollup');
 var handlebars = require('rollup-plugin-handlebars-plus');
 var rootImport = require('rollup-plugin-root-import');
 
-
 var partialRoots = [`${__dirname}/src/client/js/views/`, `${__dirname}/src/common/views/`];
 
 rollup({
@@ -39,7 +38,7 @@ rollup({
   plugins: [
     // Required by use of `partialRoot` below.
     rootImport({
-      root: partialRoots
+      root: partialRoots,
     }),
     handlebars({
       handlebars: {
@@ -55,8 +54,8 @@ rollup({
         // Options to pass to Handlebars' `parse` and `precompile` methods.
         options: {
           // Whether to generate sourcemaps for the templates
-          sourceMap: true // Default: true
-        }
+          sourceMap: true, // Default: true
+        },
       },
 
       // The ID(s) of modules to import before every template, see the "Helpers" section below.
@@ -74,10 +73,10 @@ rollup({
       partialRoot: partialRoots, // Default: none
 
       // The module ID of jQuery, see the "jQuery" section below.
-      jquery: 'jquery' // Default: none
-    })
-  ]
-})
+      jquery: 'jquery', // Default: none
+    }),
+  ],
+});
 ```
 
 lets you do this:
@@ -114,16 +113,16 @@ rollup({
   entry: 'main.js',
   plugins: [
     handlebars({
-      helpers: ['/utils/HandlebarsHelpers.js']
-    })
-  ]
-})
+      helpers: ['/utils/HandlebarsHelpers.js'],
+    }),
+  ],
+});
 ```
 
 ```js
 // /utils/HandlebarsHelpers.js
-export default function(Handlebars) {
-  Handlebars.registerHelper('encodeURIComponent', function(text) {
+export default function (Handlebars) {
+  Handlebars.registerHelper('encodeURIComponent', function (text) {
     return new Handlebars.SafeString(encodeURIComponent(text));
   });
 }
@@ -168,9 +167,9 @@ rollup({
     commonjs({
       include: 'node_modules/**',
     }),
-    handlebars()
-  ]
-})
+    handlebars(),
+  ],
+});
 ```
 
 In case you need the default runtime ID, it's available as `handlebars.runtimeId`. This might be
@@ -192,8 +191,8 @@ import Template from './index.html';
 var MyView = Backbone.View.extend({
   render() {
     this.setElement(Template());
-  }
-})
+  },
+});
 ```
 
 or by customizing the template using jQuery's APIs:
@@ -206,7 +205,7 @@ var tooltip = TooltipTemplate();
 
 tooltip.css({
   left: 50,
-  top: 100
+  top: 100,
 });
 
 $('body').append(tooltip);
@@ -223,10 +222,10 @@ rollup({
   entry: 'main.js',
   plugins: [
     handlebars({
-      jquery: 'jquery'
-    })
-  ]
-})
+      jquery: 'jquery',
+    }),
+  ],
+});
 ```
 
 Curious about how to ID jQuery when it's a global i.e. you're _not_ bundling it?
