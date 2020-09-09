@@ -1,3 +1,10 @@
+### [0.4.1](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/compare/v0.4.0...v0.4.1) (2020-09-09)
+
+
+### Bug Fixes
+
+* **deps:** [security] bump handlebars from 4.3.0 to 4.6.0 ([#102](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/issues/102)) ([8469bbd](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/commit/8469bbd5dbdddb9bd92d58092b07a53df74f7baf))
+
 ## [0.4.0](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/compare/v0.3.0...v0.4.0) (2020-09-09)
 
 
