@@ -1,3 +1,10 @@
+### [0.4.2](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/compare/v0.4.1...v0.4.2) (2020-09-09)
+
+
+### Reverts
+
+* Revert "chore: skip problematic dependabot commits" ([d904b23](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/commit/d904b2354592b945b853ddf27d6f40c6cb64955c))
+
 ### [0.4.1](https://github.com/mixmaxhq/rollup-plugin-handlebars-plus/compare/v0.4.0...v0.4.1) (2020-09-09)
 
 
