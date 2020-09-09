@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
-    "@commitlint/config-conventional": "^8.3.4",
+    "@commitlint/config-conventional": "^9.1.2",
     "@mixmaxhq/commitlint-jenkins": "^1.5.1",
     "@mixmaxhq/git-hooks": "^1.1.1",
     "@mixmaxhq/prettier-config": "^1.0.0",
