@@ -116,7 +116,7 @@ function handlebars(options) {
         body += `import '${escapePath(partial)}${options.templateExtension}';\n`;
       }
 
-      body += `var Template = Handlebars.template(${template});\n`;
+      body += `var Template = /*#__PURE__*/Handlebars.template(${template});\n`;
 
       if (options.isPartial(name)) {
         let partialName = id;
