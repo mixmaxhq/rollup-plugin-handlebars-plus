@@ -250,6 +250,12 @@ console.log(Template({}, {}, true));
 
 We welcome pull requests! Please lint your code using the JSHint configuration in this project.
 
+## Publishing a new version
+
+```
+GH_TOKEN=xxx npx semantic-release --no-ci
+```
+
 ## Credits
 
 Created by [Eli Skeggs](https://eliskeggs.com/) and [Jeff Wear](https://twitter.com/wear_here).
